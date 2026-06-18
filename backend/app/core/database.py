@@ -143,6 +143,13 @@ def init_db():
         );
         """)
         
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS hashed_password TEXT;")
+            conn.commit()
+        except Exception as e:
+            logger.warning(f"Could not add hashed_password column to users table: {e}")
+            conn.rollback()
+        
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS chats (
             id TEXT PRIMARY KEY,

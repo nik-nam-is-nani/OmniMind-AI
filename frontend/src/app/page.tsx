@@ -247,14 +247,7 @@ function BaseHomePageContent({
     }
   };
 
-  const handleGuestMode = () => {
-    if (typeof window !== "undefined") {
-      const guestToken = "guest_" + Math.random().toString(36).substring(2, 15);
-      localStorage.setItem("omnimind_google_token", guestToken);
-      document.cookie = `omnimind_token=${guestToken}; path=/; max-age=604800; SameSite=Lax`;
-      window.location.reload();
-    }
-  };
+
 
   const handleProceedToChat = async (promptToSend: string) => {
     // If user is not authenticated, save prompt and redirect
@@ -552,13 +545,7 @@ function BaseHomePageContent({
                     Continue with Google
                   </button>
 
-                  <button
-                    onClick={handleGuestMode}
-                    className="px-6 py-3 rounded-xl border border-card-border bg-card-bg hover:bg-muted-surface text-primary-text font-medium text-xs tracking-wider flex items-center gap-2 cursor-pointer shadow-lg transform active:scale-95 transition-all"
-                  >
-                    Continue to Sandbox (Guest Mode)
-                    <ChevronRight size={14} className="text-primary-text" />
-                  </button>
+
                 </>
               ) : (
                 <div className="flex flex-col items-center gap-2.5">

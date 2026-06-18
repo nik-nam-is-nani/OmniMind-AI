@@ -15,6 +15,7 @@ export default function AuthPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -113,26 +114,43 @@ export default function AuthPage() {
     setLoading(true);
 
     try {
-      // Mock email login by creating a client-side mock JWT
-      const mockPayload = {
-        email: email.trim(),
-        name: fullName.trim() || email.split("@")[0],
-        picture: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80",
-        given_name: fullName.split(" ")[0] || email.split("@")[0],
-      };
-
-      // Create a mock base64 token payload
-      const mockToken = "mock_jwt_header." + btoa(JSON.stringify(mockPayload)) + ".mock_jwt_signature";
-
-      localStorage.setItem("omnimind_google_token", mockToken);
-      document.cookie = `omnimind_token=${mockToken}; path=/; max-age=604800; SameSite=Lax`;
-
-      // Call backend init user
-      await api.initUser({
-        email: mockPayload.email,
-        display_name: mockPayload.name,
-        avatar_url: mockPayload.picture,
-      });
+      if (isSignUp) {
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match.");
+        }
+        
+        // Call backend registration
+        const registerRes = await api.register({
+          email: email.trim(),
+          password: password,
+          display_name: fullName.trim() || email.split("@")[0]
+        });
+        
+        const token = registerRes.token;
+        localStorage.setItem("omnimind_google_token", token);
+        document.cookie = `omnimind_token=${token}; path=/; max-age=604800; SameSite=Lax`;
+        
+        // Call init user to ensure chats & profile are loaded on database
+        await api.initUser({
+          email: email.trim(),
+          display_name: fullName.trim() || email.split("@")[0]
+        });
+      } else {
+        // Call backend login
+        const loginRes = await api.login({
+          email: email.trim(),
+          password: password
+        });
+        
+        const token = loginRes.token;
+        localStorage.setItem("omnimind_google_token", token);
+        document.cookie = `omnimind_token=${token}; path=/; max-age=604800; SameSite=Lax`;
+        
+        // Call init user to fetch profile details and existing chats
+        await api.initUser({
+          email: email.trim()
+        });
+      }
 
       router.push("/");
     } catch (err: any) {
@@ -155,17 +173,6 @@ export default function AuthPage() {
           {/* Google Sign-in Official GSI Button Container */}
           <div className="w-full py-1 flex flex-col gap-3 justify-center items-center">
             <div id="google-signin-btn" className="w-full min-h-[44px]" />
-            <button
-              onClick={() => {
-                const guestToken = "guest_" + Math.random().toString(36).substring(2, 15);
-                localStorage.setItem("omnimind_google_token", guestToken);
-                document.cookie = `omnimind_token=${guestToken}; path=/; max-age=604800; SameSite=Lax`;
-                window.location.reload();
-              }}
-              className="w-full py-3 rounded-full bg-[#1e2030] border border-white/10 text-zinc-300 text-sm font-normal hover:border-white/20 hover:text-white transition-all duration-150 cursor-pointer shadow-lg active:scale-95 flex items-center justify-center gap-2"
-            >
-              Continue to Sandbox (Guest Mode)
-            </button>
           </div>
 
           <div className="border-t border-white/8 pt-4">
@@ -204,6 +211,16 @@ export default function AuthPage() {
                   required
                   className="w-full px-4 py-3 rounded-full bg-[#1e2030] border border-white/8 text-primary-text text-sm focus:outline-none focus:ring-1 focus:ring-[#4f8ef7] transition-all"
                 />
+                {isSignUp && (
+                  <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-full bg-[#1e2030] border border-white/8 text-primary-text text-sm focus:outline-none focus:ring-1 focus:ring-[#4f8ef7] transition-all"
+                  />
+                )}
                 <button
                   type="submit"
                   disabled={loading}

@@ -321,5 +321,38 @@ export const api = {
     });
     if (!res.ok) throw new Error("Failed to delete account");
     return res.json();
+  },
+
+  async register(profile: {
+    email: string;
+    password: string;
+    display_name: string;
+  }): Promise<{ success: boolean; token: string; message: string }> {
+    const res = await fetch(`${API_BASE}/api/users/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(profile),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Registration failed" }));
+      throw new Error(err.detail || "Registration failed");
+    }
+    return res.json();
+  },
+
+  async login(credentials: {
+    email: string;
+    password: string;
+  }): Promise<{ success: boolean; token: string; message: string }> {
+    const res = await fetch(`${API_BASE}/api/users/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Login failed" }));
+      throw new Error(err.detail || "Login failed");
+    }
+    return res.json();
   }
 };

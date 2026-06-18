@@ -3,9 +3,35 @@ import logging
 from fastapi import Header, HTTPException, status
 from jose import jwt
 import httpx
+import hashlib
+import os
+import datetime
 from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
+
+def hash_password(password: str) -> str:
+    salt = os.urandom(16)
+    pw_hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
+    return f"{salt.hex()}:{pw_hash.hex()}"
+
+def verify_password(password: str, hashed: str) -> bool:
+    try:
+        if not hashed:
+            return False
+        salt_hex, hash_hex = hashed.split(":")
+        salt = bytes.fromhex(salt_hex)
+        pw_hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
+        return pw_hash.hex() == hash_hex
+    except Exception:
+        return False
+
+def create_access_token(data: dict) -> str:
+    settings = get_settings()
+    to_encode = data.copy()
+    expire = datetime.datetime.utcnow() + datetime.timedelta(days=7)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, settings.ENCRYPTION_KEY or "omnimind_fallback_jwt_encryption_key_32bytes", algorithm="HS256")
 
 def encrypt_key(plain_key: str, encryption_key: str) -> str:
     """
@@ -35,7 +61,7 @@ def decrypt_key(encrypted_key: str, encryption_key: str) -> str:
 
 async def verify_clerk_token(authorization: str = Header(None)) -> str:
     """
-    FastAPI dependency function that extracts and validates a Clerk or Google JWT token.
+    FastAPI dependency function that extracts and validates a Clerk, Google, or custom HS256 JWT token.
     Allows "dev_user" bypass if Clerk/Google is unconfigured or token is "dev_user".
     """
     settings = get_settings()
@@ -58,6 +84,19 @@ async def verify_clerk_token(authorization: str = Header(None)) -> str:
         
     token = authorization.split(" ")[1].strip()
     
+    # Try custom HS256 JWT validation first
+    try:
+        payload = jwt.decode(
+            token,
+            settings.ENCRYPTION_KEY or "omnimind_fallback_jwt_encryption_key_32bytes",
+            algorithms=["HS256"]
+        )
+        user_id = payload.get("sub")
+        if user_id:
+            return user_id
+    except Exception:
+        pass
+        
     # 2. Support development bypass and unique guest session isolation
     clerk_secret = settings.CLERK_SECRET_KEY
     if not clerk_secret or clerk_secret.startswith("sk_test_xxx") or token == "dev_user" or token.startswith("guest_") or token == "":

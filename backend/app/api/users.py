@@ -137,3 +137,99 @@ async def delete_me(user_id: str = Depends(verify_clerk_token)):
         "clerk_deleted": clerk_deleted,
         "message": "Account deletion completed."
     }
+
+from app.core.security import hash_password, verify_password, create_access_token
+import uuid
+
+class UserRegisterRequest(BaseModel):
+    email: str
+    password: str
+    display_name: str
+
+class UserLoginRequest(BaseModel):
+    email: str
+    password: str
+
+@router.post("/register")
+async def register_user(payload: UserRegisterRequest):
+    email = payload.email.strip().lower()
+    password = payload.password
+    display_name = payload.display_name.strip()
+    
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password are required")
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Check if email is already registered
+        cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+        existing = cursor.fetchone()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email is already registered. Please sign in.")
+            
+        # Create a new user record
+        user_id = f"email_{uuid.uuid4().hex}"
+        hashed = hash_password(password)
+        
+        cursor.execute(
+            "INSERT INTO users (id, email, display_name, hashed_password) VALUES (?, ?, ?, ?)",
+            (user_id, email, display_name, hashed)
+        )
+        conn.commit()
+        
+        # Issue JWT token
+        token = create_access_token({"sub": user_id, "email": email, "name": display_name})
+        
+        return {
+            "success": True,
+            "token": token,
+            "message": "User registered successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error registering user: {e}")
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
+    finally:
+        conn.close()
+
+@router.post("/login")
+async def login_user(payload: UserLoginRequest):
+    email = payload.email.strip().lower()
+    password = payload.password
+    
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password are required")
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Retrieve user record
+        cursor.execute("SELECT id, display_name, hashed_password FROM users WHERE email = ?", (email,))
+        user_row = cursor.fetchone()
+        if not user_row or not user_row.get("hashed_password"):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+            
+        hashed_password = user_row["hashed_password"]
+        if not verify_password(password, hashed_password):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+            
+        user_id = user_row["id"]
+        display_name = user_row["display_name"] or email.split("@")[0]
+        
+        # Issue JWT token
+        token = create_access_token({"sub": user_id, "email": email, "name": display_name})
+        
+        return {
+            "success": True,
+            "token": token,
+            "message": "Logged in successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error logging in user: {e}")
+        raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
+    finally:
+        conn.close()
