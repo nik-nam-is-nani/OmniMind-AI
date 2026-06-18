@@ -39,20 +39,31 @@ export function useUser() {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("omnimind_google_token");
       if (token) {
-        const payload = parseJwt(token);
-        if (payload) {
+        if (token.startsWith("guest_")) {
           setUser({
-            primaryEmailAddress: { emailAddress: payload.email || "" },
-            fullName: payload.name || "OmniUser",
-            firstName: payload.given_name || payload.name?.split(" ")[0] || "Omni",
-            username: payload.email?.split("@")[0] || "omniuser",
-            imageUrl: payload.picture || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80",
+            primaryEmailAddress: { emailAddress: `${token}@guest.omnimind.ai` },
+            fullName: "Guest User",
+            firstName: "Guest",
+            username: token,
+            imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80",
           });
           setIsSignedIn(true);
         } else {
-          // Token is invalid/corrupt, clean up
-          localStorage.removeItem("omnimind_google_token");
-          document.cookie = "omnimind_token=; path=/; max-age=0; SameSite=Lax";
+          const payload = parseJwt(token);
+          if (payload) {
+            setUser({
+              primaryEmailAddress: { emailAddress: payload.email || "" },
+              fullName: payload.name || "OmniUser",
+              firstName: payload.given_name || payload.name?.split(" ")[0] || "Omni",
+              username: payload.email?.split("@")[0] || "omniuser",
+              imageUrl: payload.picture || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80",
+            });
+            setIsSignedIn(true);
+          } else {
+            // Token is invalid/corrupt, clean up
+            localStorage.removeItem("omnimind_google_token");
+            document.cookie = "omnimind_token=; path=/; max-age=0; SameSite=Lax";
+          }
         }
       }
       setIsLoaded(true);

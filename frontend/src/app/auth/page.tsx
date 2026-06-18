@@ -39,7 +39,7 @@ export default function AuthPage() {
     const initGoogleGSI = () => {
       if (typeof window !== "undefined" && (window as any).google?.accounts?.id) {
         (window as any).google.accounts.id.initialize({
-          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1016845345719-7tq8f5n48e24483d9894dbq0e238914.apps.googleusercontent.com",
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "612756844403-t9vaaqvnh6effranaetf5lq1fpfsjj0j.apps.googleusercontent.com",
           callback: handleCredentialResponse,
         });
 

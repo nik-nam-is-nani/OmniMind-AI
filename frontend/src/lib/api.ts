@@ -7,7 +7,7 @@ if (process.env.CLERK_SECRET_KEY && process.env.CLERK_SECRET_KEY.includes("xxxxx
   process.env.CLERK_SECRET_KEY = "sk_test_dGVzdC1jbGVyay0xOC5jbGVyay5hY2NvdW50cy5kZXYk";
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://omnimind-c.duckdns.org";
 
 // Check if Clerk is active in environment variables
 const CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
