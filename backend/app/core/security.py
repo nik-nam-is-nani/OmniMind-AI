@@ -59,6 +59,22 @@ def decrypt_key(encrypted_key: str, encryption_key: str) -> str:
         logger.error(f"Error decrypting API key: {e}")
         raise ValueError("Failed to decrypt key")
 
+def map_email_to_existing_user_id(user_id: str, email: str) -> str:
+    if not email:
+        return user_id
+    try:
+        from app.core.database import get_pg_connection
+        conn = get_pg_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM users WHERE email = %s", (email.lower().strip(),))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return row["id"]
+    except Exception as e:
+        logger.error(f"Error mapping email to existing user ID: {e}")
+    return user_id
+
 async def verify_clerk_token(authorization: str = Header(None)) -> str:
     """
     FastAPI dependency function that extracts and validates a Clerk, Google, or custom HS256 JWT token.
@@ -92,8 +108,9 @@ async def verify_clerk_token(authorization: str = Header(None)) -> str:
             algorithms=["HS256"]
         )
         user_id = payload.get("sub")
+        email = payload.get("email")
         if user_id:
-            return user_id
+            return map_email_to_existing_user_id(user_id, email)
     except Exception:
         pass
         
@@ -109,7 +126,9 @@ async def verify_clerk_token(authorization: str = Header(None)) -> str:
             parts = token.split(".")
             payload_str = base64.b64decode(parts[1] + "===").decode("utf-8")
             payload = json.loads(payload_str)
-            return payload.get("email") or "dev_user"
+            email = payload.get("email")
+            user_id = email or "dev_user"
+            return map_email_to_existing_user_id(user_id, email)
         except Exception:
             return "dev_user"
             
@@ -148,13 +167,14 @@ async def verify_clerk_token(authorization: str = Header(None)) -> str:
         )
         
         user_id = payload.get("sub")
+        email = payload.get("email")
         if not user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token verified but missing subject ('sub') user ID"
             )
             
-        return user_id
+        return map_email_to_existing_user_id(user_id, email)
         
     except Exception as e:
         logger.error(f"JWT authentication failed: {e}")
