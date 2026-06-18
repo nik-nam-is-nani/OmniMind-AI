@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # Universal Fallback Agent Key
     UNIVERSAL_FALLBACK_API_KEY: str = ""
 
+    # Frontend URL for CORS configuration
+    FRONTEND_URL: str = "*"
+
     class Config:
         env_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".env")
         env_file_encoding = "utf-8"
