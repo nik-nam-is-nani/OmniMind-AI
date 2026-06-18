@@ -1,0 +1,397 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-muted-surface: var(--muted-surface);
+  --color-input-bg: var(--input-bg);
+  --color-assistant-bg: var(--assistant-bg);
+  --color-primary-text: var(--primary-text);
+  --color-secondary-text: var(--secondary-text);
+  --color-muted-text: var(--muted-text);
+  
+  --color-accent-violet: var(--accent-violet);
+  --color-accent-violet-hover: var(--accent-violet-hover);
+  --color-success-val: var(--success);
+  --color-error-val: var(--error);
+  --color-warning-val: var(--warning);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Roboto Mono, monospace;
+}
+
+:root {
+  /* Minimal Dark Theme values by default (Gemini Aesthetic) */
+  --background: #0d0e14;
+  --foreground: #fafafa;
+  --sidebar-bg: #0d0e14;
+  --card-bg: #13141c;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --muted-surface: #13141c;
+  --input-bg: #1e2030;
+  --assistant-bg: transparent;
+  --primary-text: #fafafa;
+  --secondary-text: #a1a1aa;
+  --muted-text: #71717a;
+
+  --accent-violet: #4f8ef7; /* Primary Blue */
+  --accent-violet-hover: #7c5cfc; /* Accent Purple */
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+}
+
+:root:is(.dark) {
+  /* Keep aligned with the Gemini minimal dark design system */
+  --background: #0d0e14;
+  --foreground: #fafafa;
+  --sidebar-bg: #0d0e14;
+  --card-bg: #13141c;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --muted-surface: #13141c;
+  --input-bg: #1e2030;
+  --assistant-bg: transparent;
+  --primary-text: #fafafa;
+  --secondary-text: #a1a1aa;
+  --muted-text: #71717a;
+
+  --accent-violet: #4f8ef7;
+  --accent-violet-hover: #7c5cfc;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+/* Premium Card and Panel Borders */
+.premium-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem; /* rounded-xl */
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-text);
+}
+
+/* Animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.03);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 6s infinite ease-in-out;
+}
+
+.bg-gradient-radial {
+  background-image: radial-gradient(var(--tw-gradient-stops));
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-float {
+  animation: float 4s infinite ease-in-out;
+}
+
+/* Staggered Pulsing Dots Animation */
+@keyframes staggerPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.thinking-dot {
+  animation: staggerPulse 1.2s infinite ease-in-out;
+}
+.thinking-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.thinking-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* 1px Violet Blinking Cursor Animation */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.blinking-cursor {
+  display: inline-block;
+  width: 1px;
+  height: 1.1em;
+  background-color: #a78bfa; /* violet-400 */
+  animation: cursorBlink 0.5s step-end infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+/* Transition Ease classes */
+.interactive-transition {
+  transition: all 150ms ease-in-out;
+}
+
+/* Message transition: translateY 8px to 0, opacity 0 to 1, over 200ms */
+.message-appear {
+  animation: messageAppear 200ms ease-in-out forwards;
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Indicator Lights */
+.indicator-pulse {
+  position: relative;
+}
+.indicator-pulse::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  animation: indicatorRings 1.8s infinite ease-out;
+  opacity: 0;
+}
+
+@keyframes indicatorRings {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Landing Page Transition Animations */
+.landing-fade-exit {
+  opacity: 0;
+  transform: scale(0.96);
+  pointer-events: none;
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1), transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-fade-enter {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 600ms ease-out, transform 600ms ease-out;
+}
+
+/* Chat UI Polish Custom Styles */
+
+@keyframes aurora-rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.aurora-active {
+  background: linear-gradient(
+    135deg,
+    rgba(239,68,68,0.03),
+    rgba(249,115,22,0.03),
+    rgba(234,179,8,0.02),
+    rgba(34,197,94,0.03),
+    rgba(6,182,212,0.04),
+    rgba(79,142,247,0.05),
+    rgba(99,102,241,0.04),
+    rgba(139,92,246,0.04)
+  ) !important;
+  background-size: 400% 400% !important;
+  animation: aurora-rainbow 3s ease infinite !important;
+}
+
+/* Gemini-style Thinking Shimmer Animation */
+@keyframes thinkingShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.thinking-shimmer {
+  width: 120px;
+  height: 2px;
+  margin: 12px auto;
+  background: linear-gradient(90deg, transparent 0%, #4f8ef7 30%, #7c5cfc 70%, transparent 100%);
+  background-size: 200% 100%;
+  animation: thinkingShimmer 1.2s infinite linear;
+}
+
+/* Paragraph Fade-In Response Rendering */
+.paragraph-fade-in {
+  opacity: 0;
+  transform: translateY(4px);
+  animation: paragraphFadeIn 350ms cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+}
+
+@keyframes paragraphFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.paragraph-pulsing {
+  animation: paragraphPulse 800ms ease-in-out infinite alternate;
+}
+
+@keyframes paragraphPulse {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1.0;
+  }
+}
+
+/* Streaming Cursor */
+.streaming-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background-color: #4f8ef7; /* Gemini Blue */
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: cursorBlink 500ms step-end infinite alternate;
+}
+
+/* Scrollbar Hiding */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+/* Delayed Model Badge Fade-in */
+.model-badge-delayed {
+  opacity: 0;
+  animation: fadeInDelayed 300ms ease-out 300ms forwards;
+}
+
+@keyframes fadeInDelayed {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Chat Session Switch Cross-Fade */
+.chat-messages-container {
+  transition: opacity 200ms ease-in-out;
+}
+.chat-messages-container.fade-out {
+  opacity: 0;
+  transition: opacity 150ms ease-in-out;
+}
+.chat-messages-container.fade-hidden {
+  opacity: 0;
+  transition: none;
+}
+.chat-messages-container.fade-in {
+  opacity: 1;
+  transition: opacity 200ms ease-in-out;
+}
+
+/* Loading Shimmer Skeleton */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    rgba(39, 39, 42, 0.4) 25%,
+    rgba(63, 63, 70, 0.5) 37%,
+    rgba(39, 39, 42, 0.4) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Media query to respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-glow,
+  .animate-float,
+  .thinking-dot,
+  .blinking-cursor,
+  .message-appear,
+  .thinking-aurora,
+  .paragraph-fade-in,
+  .paragraph-pulsing,
+  .streaming-cursor,
+  .model-badge-delayed {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+

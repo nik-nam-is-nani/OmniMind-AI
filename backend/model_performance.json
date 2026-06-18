@@ -1,0 +1,45 @@
+{
+  "last_updated": "2024-01-01T00:00:00",
+  "models": {
+    "gemini-1.5-flash": {
+      "summarization": 81.17,
+      "math_logic": 71,
+      "architecture_coding": 79,
+      "general_creative": 85.64,
+      "speed_score": 75.65,
+      "cost_score": 100
+    },
+    "gemini-1.5-pro": {
+      "summarization": 85,
+      "math_logic": 84,
+      "architecture_coding": 92,
+      "general_creative": 86,
+      "speed_score": 70,
+      "cost_score": 90
+    },
+    "groq-llama-3": {
+      "summarization": 87.95,
+      "math_logic": 72,
+      "architecture_coding": 75,
+      "general_creative": 77.02,
+      "speed_score": 92.6,
+      "cost_score": 100
+    },
+    "deepseek-chat": {
+      "summarization": 78,
+      "math_logic": 94,
+      "architecture_coding": 88,
+      "general_creative": 74,
+      "speed_score": 75,
+      "cost_score": 98
+    },
+    "openrouter-fallback": {
+      "summarization": 75,
+      "math_logic": 72.27,
+      "architecture_coding": 76.42,
+      "general_creative": 77.24,
+      "speed_score": 76.22,
+      "cost_score": 100
+    }
+  }
+}
