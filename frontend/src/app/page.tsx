@@ -133,6 +133,13 @@ function BaseHomePageContent({
   const [uploadedFile, setUploadedFile] = useState<{ name: string; text: string; size: number } | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  // Redirect to auth page if the user is not signed in
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.replace("/auth");
+    }
+  }, [isLoaded, isSignedIn, router]);
+
   // Handle routing if query parameters are present on initial load
   useEffect(() => {
     const id = searchParams.get("id");
@@ -142,9 +149,9 @@ function BaseHomePageContent({
     }
   }, [searchParams]);
 
-  // Synchronize Clerk auth status & auto-run onboarding checks
+  // Synchronize auth status & auto-run onboarding checks
   useEffect(() => {
-    if (isClerkActive && isLoaded && isSignedIn && user) {
+    if (isLoaded && isSignedIn && user) {
       const handleUserOnboarding = async () => {
         try {
           const res = await api.initUser({
@@ -605,7 +612,7 @@ function BaseHomePageContent({
   );
 }
 
-function ClerkHomePageContent() {
+function HomePageContent() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { openSignIn, signOut } = useClerk();
 
@@ -618,25 +625,6 @@ function ClerkHomePageContent() {
       signOut={signOut}
     />
   );
-}
-
-function GuestHomePageContent() {
-  return (
-    <BaseHomePageContent
-      isLoaded={true}
-      isSignedIn={false}
-      user={null}
-      openSignIn={() => {}}
-    />
-  );
-}
-
-function HomePageContent() {
-  if (isClerkActive) {
-    return <ClerkHomePageContent />;
-  } else {
-    return <GuestHomePageContent />;
-  }
 }
 
 export default function HomePage() {

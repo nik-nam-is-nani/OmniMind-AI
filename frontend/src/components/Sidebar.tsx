@@ -248,12 +248,17 @@ export default function Sidebar({ activeChatId, onSelectChat }: SidebarProps) {
     }
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     if (!confirm("Do you want to sign out of your session?")) return;
     localStorage.clear();
     sessionStorage.clear();
-    if (isClerkActive && signOut) {
-      signOut().then(() => router.push("/auth"));
+    if (signOut) {
+      try {
+        await signOut();
+      } catch (err) {
+        console.error("Sign out error:", err);
+        router.push("/auth");
+      }
     } else {
       router.push("/auth");
     }
