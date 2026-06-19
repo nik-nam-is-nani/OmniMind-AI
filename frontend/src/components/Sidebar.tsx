@@ -235,11 +235,19 @@ export default function Sidebar({ activeChatId, onSelectChat }: SidebarProps) {
     if (!confirm("Are you sure you want to delete this chat session?")) return;
     try {
       await api.deleteChat(chatId);
-      setChats((prev) => prev.filter((c) => c.id !== chatId));
+      const updatedChats = chats.filter((c) => c.id !== chatId);
+      setChats(updatedChats);
       if (activeChatId === chatId) {
-        if (onSelectChat) {
-          onSelectChat("");
+        if (updatedChats.length > 0) {
+          if (onSelectChat) {
+            onSelectChat(updatedChats[0].id);
+          } else {
+            router.push(`/?id=${updatedChats[0].id}`);
+          }
         } else {
+          if (onSelectChat) {
+            onSelectChat(null);
+          }
           router.push("/");
         }
       }

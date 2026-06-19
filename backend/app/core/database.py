@@ -520,15 +520,19 @@ def get_user_chats(user_id: str) -> List[Dict[str, Any]]:
 
 def delete_chat(user_id: str, chat_id: str) -> bool:
     conn = get_pg_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute("DELETE FROM chats WHERE id = %s AND user_id = %s", (chat_id, user_id))
+        # Delete messages first
+        cur.execute("DELETE FROM messages WHERE chat_id = %s AND user_id = %s", (chat_id, user_id))
+        # Delete the chat
+        cur.execute("DELETE FROM chats WHERE id = %s AND user_id = %s", (chat_id, user_id))
         conn.commit()
         return True
     except Exception as e:
         logger.error(f"Error deleting chat: {e}")
         return False
     finally:
+        cur.close()
         conn.close()
 
 def log_message(

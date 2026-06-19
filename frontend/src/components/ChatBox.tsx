@@ -287,25 +287,24 @@ export default function ChatBox({ chatId, onBack, initialInput, initialFile }: C
 
   // Load message logs when chatId changes
   useEffect(() => {
+    // Reset all state when chatId changes
+    setMessages([]);
+    setStreamingText("");
+    setLoading(false);
+    setError(null);
+    setHasMore(false);
+    setLoadingMore(false);
+    hasLoadedMessages.current = false;
+
     if (!chatId) {
-      setMessages([]);
-      hasLoadedMessages.current = false;
       lastChatId.current = null;
-      setHasMore(false);
-      setLoadingMore(false);
       return;
     }
 
-    // Reset when switching to a different chat session
-    if (lastChatId.current !== chatId) {
-      hasLoadedMessages.current = false;
-      lastChatId.current = chatId;
-      setHasMore(false);
-      setLoadingMore(false);
-    }
+    lastChatId.current = chatId;
 
     // Only run initial messages fetch once, and never again during active streaming sessions
-    if (hasLoadedMessages.current || isStreaming.current) {
+    if (isStreaming.current) {
       return;
     }
 
@@ -1599,7 +1598,7 @@ export default function ChatBox({ chatId, onBack, initialInput, initialFile }: C
         {!loading && messages.length === 0 && !streamingText && (
           <div className="h-64 flex flex-col items-center justify-center text-center space-y-2 select-none">
             <Bot size={24} className="text-zinc-600/30 animate-pulse" />
-            <p className="text-xs text-zinc-500 italic">This session is empty. Type your message below to begin.</p>
+            <p className="text-xs text-zinc-500 italic">Start your conversation.</p>
           </div>
         )}
 

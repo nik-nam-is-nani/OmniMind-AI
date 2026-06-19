@@ -104,6 +104,20 @@ def delete_user_chat(chat_id: str, user_id: str = Depends(verify_clerk_token)):
 
         if not success:
             raise HTTPException(status_code=500, detail="Failed to delete chat")
+            
+        # Delete all Neo4j nodes tagged with this session_id and user_id
+        try:
+            from app.core.graph import driver
+            if driver:
+                with driver.session() as session:
+                    session.run(
+                        "MATCH (n {session_id: $chat_id, user_id: $user_id}) DETACH DELETE n",
+                        chat_id=chat_id,
+                        user_id=user_id
+                    )
+        except Exception as graph_err:
+            logger.error(f"Error deleting Neo4j nodes for chat {chat_id}: {graph_err}")
+            
         return {"success": True, "message": "Chat deleted"}
     except Exception as e:
         logger.error(f"Error deleting chat {chat_id}: {e}")

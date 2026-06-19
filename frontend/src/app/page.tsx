@@ -61,7 +61,7 @@ function ChatWorkspace({
     setActiveChatId(id);
   }, [searchParams]);
 
-  const handleSelectChat = (chatId: string) => {
+  const handleSelectChat = (chatId: string | null) => {
     if (chatId) {
       router.push(`/?id=${chatId}`);
     } else {
@@ -76,6 +76,7 @@ function ChatWorkspace({
 
       {/* Main Chat Interface */}
       <ChatBox
+        key={activeChatId}
         chatId={activeChatId}
         onBack={onBack}
         initialInput={initialInput}
