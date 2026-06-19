@@ -32,7 +32,7 @@ const isClerkActive = !!(
 );
 
 interface SidebarProps {
-  onSelectChat?: (chatId: string) => void;
+  onSelectChat?: (chatId: string | null) => void;
   activeChatId?: string | null;
 }
 
